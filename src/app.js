@@ -24,7 +24,9 @@ app.use('/Inventario',routes)
 app.use('/downloadHWHosts',routes)
 app.use('/hosts',routes)
 app.use('/shutdown',routes)
-
+app.use('/offall',routes)
+app.use('/alarmas',routes)
+app.use('/deletAlarma',routes)
 
 
 app.listen(app.get('port'),() =>{

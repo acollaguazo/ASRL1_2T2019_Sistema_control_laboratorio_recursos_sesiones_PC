@@ -2,28 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const model = require('../model/workstation')();
+const alarmas = require('../model/alarmas')();
 
-// Getting Date
-function addZero(i) {
-    if (i < 10) {
-        i = '0' + i;
-    }
-    return i;
-}
-function FechaActual(){
-    var hoy = new Date();
-    var dd = hoy.getDate();
-    var mm = hoy.getMonth()+1;
-    var yyyy = hoy.getFullYear();
-        
-    dd = addZero(dd);
-    mm = addZero(mm);
 
-    return hoy = yyyy+'-'+mm+'-'+dd;
-}
-const date= FechaActual();
-const query={date:date}
-//console.log(query);
 router.get('/',(req,res) => {
     model.find({},(err, data)=>{
         console.log(data)
@@ -79,9 +60,70 @@ router.get('/downloadHWHosts/', (req, res) => {
 })
 
 //Shutdown
-router.get('/shutdown',(req,res)=>{
-    exec('shutdown now', function(error, stdout, stderr){
-        callback(stdout)});
+function off(ip){
+    console.log('off@'+ip.trim()+'hola')
+    const { spawn } = require('child_process');
+    const ls = spawn('ssh', ['off@'+ip.trim()]);
+    ls.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+    });
+    /*ls.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+    });
+
+    ls.on('close', (code) => {
+    console.log(`child process exited with code ${code}`);
+    });*/
+}
+router.get('/shutdown/:id', function (req, res) {
+    let id = req.params.id;
+    model.findById(id,(err,pc)=>{
+        if (err) throw err;
+        console.log(pc.ip)
+        off(pc.ip)
+        pc.status="Apagado"
+        pc.hostname=" ";
+        pc.internet=" ";
+        pc.start_time=" ";
+        pc.save().then(() => res.redirect('/'))
+    })
+});
+
+//PowerOFF All
+router.get('/offall',function(req,res){
+    console.log('Apagando Equipos...')
+    model.find({},(err,pc)=>{
+        if (err) throw err;
+        for(var i = 1; i < pc.length;i++){
+            console.log(pc[i].ip)
+            off(pc[i].ip)
+            pc[i].status="Apagado"
+            pc[i].hostname=" ";
+            pc[i].internet=" ";
+            pc[i].start_time=" ";
+            pc[i].save()
+        }
+        res.redirect('/')
+    })
 })
+
+//Alarmas
+router.get('/alarmas',(req,res)=>{
+    alarmas.find({},(err,data)=>{
+        res.render('alarmas',{
+            title: 'Alarmas',
+            alarma: data
+            });
+    })
+})
+router.get('/deletAlarma/:id', function (req, res) {
+    let id = req.params.id;
+    alarmas.findById(id,(err,pc)=>{
+        if (err) throw err;
+        console.log(pc.ip)
+        pc.description=0
+        pc.save().then(() => res.redirect('/'))
+    })
+});
 
 module.exports = router;

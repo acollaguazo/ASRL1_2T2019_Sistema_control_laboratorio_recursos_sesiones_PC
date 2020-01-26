@@ -1,0 +1,31 @@
+<!DOCTYPE HTML5>
+<html>
+
+<body>
+		
+		<% for (var i = 0; i < alarma.length; i++) {%>
+		<%if(alarma[i].description!=0){%>
+			<%if(alarma[i].type=="warning"){%>
+				<div class="alert alert-warning alert-dismissible fade show" role="alert">
+					<strong><%=alarma[i].description%> </strong>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			<%}%>
+			<%if(alarma[i].type=="info"){%>
+				<div class="alert alert-info alert-dismissible fade show" role="alert">
+					<strong><%=alarma[i].description%> </strong>
+					<button onclick="location.href='/deletAlarma/<%=alarma[i]._id%>'" type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			<%}%>
+		<% }%>
+		<% }%>
+
+	
+
+</body>
+
+</html>
